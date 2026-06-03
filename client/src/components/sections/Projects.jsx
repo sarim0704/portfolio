@@ -110,6 +110,19 @@ function getCategoryMeta(project) {
   return map[category] || { label: 'Project', color: '#10b981' };
 }
 
+function getProjectIcon(project) {
+  const text = `${project.category || ''} ${project.title || ''}`.toLowerCase();
+
+  if (text.includes('hospital') || text.includes('dbms')) return '🏥';
+  if (text.includes('ai') || text.includes('ml') || text.includes('humantrace')) return '🤖';
+  if (text.includes('saas') || text.includes('career')) return '🚀';
+  if (text.includes('client') || text.includes('bungjack')) return '🌐';
+  if (text.includes('loan')) return '📊';
+  if (text.includes('e-commerce') || text.includes('tasmaha')) return '🛒';
+
+  return '💻';
+}
+
 function ProjectModal({ project, onClose }) {
   if (!project) return null;
 
@@ -120,12 +133,18 @@ function ProjectModal({ project, onClose }) {
   return createPortal(
     <div
       className="projects-modal-overlay"
+      data-lenis-prevent
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="projects-modal"
+        className="projects-modal case-study-modal"
+        data-lenis-prevent
+        data-lenis-prevent-wheel
+        data-lenis-prevent-touch
         onClick={(e) => e.stopPropagation()}
+        onWheel={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
@@ -138,9 +157,9 @@ function ProjectModal({ project, onClose }) {
           <X size={18} />
         </button>
 
-        <div className="projects-modal-head">
+        <header className="case-study-head">
           <span
-            className="projects-modal-badge"
+            className="case-study-badge"
             style={{
               color: categoryMeta.color,
               background: `${categoryMeta.color}18`,
@@ -151,50 +170,52 @@ function ProjectModal({ project, onClose }) {
 
           <h3>{project.title}</h3>
           <p>{project.subtitle || getStatusLine(project)}</p>
-        </div>
+        </header>
 
         <div
-          className="projects-modal-visual"
+          className="case-study-visual"
           style={{ background: getCardAccent(project) }}
         >
-          <img
-            src={project.thumbnailUrl || '/uploads/project-placeholder.jpg'}
-            alt={project.title}
-          />
+          {project.thumbnailUrl ? (
+            <img src={project.thumbnailUrl} alt={project.title} />
+          ) : (
+            <span className="case-study-icon">{getProjectIcon(project)}</span>
+          )}
         </div>
 
-        <div className="projects-modal-body">
-          <div className="projects-modal-section">
+        <main className="case-study-body">
+          <section className="case-study-section">
             <h4>Overview</h4>
             <p>
               {project.description ||
                 'A structured product build focused on clean UI, reliable backend logic, and deployment-ready architecture.'}
             </p>
-          </div>
+          </section>
 
           {features.length > 0 && (
-            <div className="projects-modal-section">
+            <section className="case-study-section">
               <h4>Key Features</h4>
               <ul>
                 {features.slice(0, 7).map((feature) => (
                   <li key={feature}>{feature}</li>
                 ))}
               </ul>
-            </div>
+            </section>
           )}
 
           {tech.length > 0 && (
-            <div className="projects-modal-section">
+            <section className="case-study-section">
               <h4>Tech Stack</h4>
-              <div className="projects-modal-tech">
+
+              <div className="case-study-tech">
                 {tech.map((item) => (
                   <span key={item}>{item}</span>
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
-          <div className="projects-modal-actions">
+          <div className="case-study-actions">
             {project.liveUrl ? (
               <a href={project.liveUrl} target="_blank" rel="noreferrer">
                 Open Live Preview <ExternalLink size={15} />
@@ -203,7 +224,7 @@ function ProjectModal({ project, onClose }) {
               <span>{getStatusLine(project)}</span>
             )}
           </div>
-        </div>
+        </main>
       </div>
     </div>,
     document.body
@@ -233,6 +254,16 @@ export function Projects() {
   }, [projects, activeCategory]);
 
   const activeProject = filteredProjects[activeIndex] || filteredProjects[0];
+
+  useEffect(() => {
+    if (selectedProject) {
+      document.body.classList.add('project-modal-open');
+    } else {
+      document.body.classList.remove('project-modal-open');
+    }
+
+    return () => document.body.classList.remove('project-modal-open');
+  }, [selectedProject]);
 
   useEffect(() => {
     setActiveIndex(0);
