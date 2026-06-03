@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { getProfile, updateProfile, uploadPortrait, uploadResume } from '../controllers/profileController.js';
+import { protect } from '../middleware/auth.js';
+import { upload } from '../middleware/upload.js';
+const router = Router();
+router.get('/', getProfile);
+router.put('/admin', protect, updateProfile);
+router.post('/admin/upload/portrait', protect, upload.single('file'), uploadPortrait);
+router.post('/admin/upload/resume', protect, upload.single('file'), uploadResume);
+export default router;

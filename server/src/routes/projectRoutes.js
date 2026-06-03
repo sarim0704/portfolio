@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import { getProjects, createProject, updateProject, deleteProject, uploadProjectThumbnail } from '../controllers/projectController.js';
+import { protect } from '../middleware/auth.js';
+import { upload } from '../middleware/upload.js';
+const router = Router();
+router.get('/', getProjects);
+router.post('/admin', protect, createProject);
+router.put('/admin/:id', protect, updateProject);
+router.delete('/admin/:id', protect, deleteProject);
+router.post('/admin/:id/thumbnail', protect, upload.single('file'), uploadProjectThumbnail);
+export default router;
